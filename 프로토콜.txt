@@ -1,0 +1,3 @@
+Data Length : Data Length ~ CRC 이전까지의 바이트 합
+
+Length : Length ~ CRC 이전까지의 바이트 합
