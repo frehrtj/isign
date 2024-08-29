@@ -93,7 +93,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  send_data(-3562);
+  send_data(-25);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -289,7 +289,7 @@ void send_data(int temperature)
 	data[idx++] = 0;
 
 	// data len
-	data[idx++] =  36 + 1 + 9 + temperature_len + minus;
+	data[idx++] =  36 + 1 + 9 + temperature_len + minus + 3;
 
 	data[idx++] = 0x49;
 	data[idx++] = 0x4E;
@@ -329,7 +329,7 @@ void send_data(int temperature)
 	data[idx++] = 0;
 
 	// len
-	data[idx++] = 9 + temperature_len + minus;
+	data[idx++] = 9 + temperature_len + minus + 3;
 
 	data[idx++] = 0x50;
 	data[idx++] = 0x72;
@@ -352,7 +352,9 @@ void send_data(int temperature)
 		data[idx++] = (uint8_t)(temperature / pow(10, i)) + '0';
 		temperature = temperature % (int)pow(10, i);
 	}
-
+	data[idx++] = 0xB0;
+	data[idx++] = 0;
+	data[idx++] = 'C';
 	// data 끝
 
 	data[idx++] = 0xFF;
