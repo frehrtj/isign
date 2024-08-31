@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <math.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,7 +54,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-void send_data(int);
+void send_data(float);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -93,7 +94,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  send_data(-25);
+  send_data(100.123);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -264,23 +265,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-int get_temp_len(int t)
-{
-	int len = 0;
-	while(t)
-	{
-		t /= 10;
-		len++;
-	}
-	return len;
-}
 
-void send_data(int temperature)
+
+void send_data(float temperature)
 {
 	uint8_t data[100] = {0, };
 	int idx = 0;
-	int minus = temperature < 0 ? 1 : 0;
-	int temperature_len = get_temp_len(temperature);
+	char temperature_str[10] = {0, };
+	int temp_str_len = snprintf(temperature_str, 10, "%.1f", temperature);
 
 	data[idx++] = 0x7E;
 	data[idx++] = 0x01;
@@ -289,7 +281,7 @@ void send_data(int temperature)
 	data[idx++] = 0;
 
 	// data len
-	data[idx++] =  36 + 1 + 9 + temperature_len + minus + 3;
+	data[idx++] =  36 + 1 + 9 + temp_str_len + 3;
 
 	data[idx++] = 0x49;
 	data[idx++] = 0x4E;
@@ -329,7 +321,7 @@ void send_data(int temperature)
 	data[idx++] = 0;
 
 	// len
-	data[idx++] = 9 + temperature_len + minus + 3;
+	data[idx++] = 9 + temp_str_len + 3;
 
 	data[idx++] = 0x50;
 	data[idx++] = 0x72;
@@ -341,17 +333,12 @@ void send_data(int temperature)
 	data[idx++] = 0x30;
 	data[idx++] = 0x31;
 
-	if(minus)
-	{
-		data[idx++] = '-';
-		temperature *= -1;
-	}
 	// data 시작
-	for(int i = temperature_len - 1; i >= 0; i--)
+	for(int i = 0; i < temp_str_len; i++)
 	{
-		data[idx++] = (uint8_t)(temperature / pow(10, i)) + '0';
-		temperature = temperature % (int)pow(10, i);
+		data[idx++] = temperature_str[i];
 	}
+
 	data[idx++] = 0xB0;
 	data[idx++] = 0;
 	data[idx++] = 'C';
